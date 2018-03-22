@@ -25,14 +25,16 @@ namespace ConsoleApplication5
         static void TestIndexCreation()
         {
             Dictionary<string, string> testDocs = new Dictionary<string, string>();
-            testDocs.Add("doc1", "Friends, Romans and countrymen lend me your ears.");
-            testDocs.Add("doc2", "Julius Ceasar was a Roman. Brutus was also a Roman!");
-            testDocs.Add("doc3", "Brutus killed his friend Ceasar, a Roman Emperor.");
-            testDocs.Add("doc4", "brutus and Popeye were cartoon characters too!");
+            string randomtxt=System.IO.File.ReadAllText(@"C:\Users\Jay Mukherjee\Documents\DocumentForSearchTest.txt");
+            string[] texts = randomtxt.Split(new string[] { "#######-------#######------!!!!!-------######" },StringSplitOptions.None);
+            for(int i=0; i<texts.Length; i++)
+            {
+                testDocs.Add("doc" + i, texts[i]);
+            }
             Index.Indexor idx = new Index.Indexor();
             idx.CreateInvertedIndex(testDocs);
             var invidx = idx.InvertedIdx;
-            var querySet = idx.Search("Roman countrymen olive");
+            var querySet = idx.Search("search engines");
             Console.WriteLine("Done");
 
         }

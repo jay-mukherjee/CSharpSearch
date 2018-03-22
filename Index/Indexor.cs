@@ -9,13 +9,13 @@ namespace ConsoleApplication5.Index
     public class Indexor
     {
         private Dictionary<string, Dictionary<string,int>> invertedIdx;
-        private HashSet<string> idxCorpus;
+        //private HashSet<string> idxCorpus;
         private HashSet<string> queryTokens;
         private Dictionary<string, double> terms_Idf;
         private Dictionary<string, int> docLength;
 
         public Dictionary<string, Dictionary<string,int>> InvertedIdx { get => invertedIdx; set => invertedIdx = value; }
-        public HashSet<string> IdxCorpus { get => idxCorpus; set => idxCorpus = value; }
+        //public HashSet<string> IdxCorpus { get => idxCorpus; set => idxCorpus = value; }
         public HashSet<string> QueryTokens { get => queryTokens; set => queryTokens = value; }
         public float AvgDocLength { get; set; }
         public Dictionary<string, int> DocLength { get => docLength; set => docLength = value; }
@@ -24,12 +24,12 @@ namespace ConsoleApplication5.Index
 
         public Indexor() {
             this.invertedIdx = new Dictionary<string, Dictionary<string,int>>();
-            this.idxCorpus = new HashSet<string>();
+            //this.idxCorpus = new HashSet<string>();
         }
         public Indexor(Indexor idx)
         {
             this.invertedIdx = idx.InvertedIdx;
-            this.idxCorpus = idx.IdxCorpus;
+            //this.idxCorpus = idx.IdxCorpus;
         }
 
         public void CreateInvertedIndex(Dictionary<string, string> docField)
@@ -55,7 +55,7 @@ namespace ConsoleApplication5.Index
                     }
                     
                     //also add this to the index term corpus
-                    idxCorpus.Add(term);
+                    //idxCorpus.Add(term);
                 }
                 //update the docLength data structure
                 docLength.Add(docid, countOfTokens);
@@ -64,16 +64,20 @@ namespace ConsoleApplication5.Index
             createTermIdfs();
         }
 
-        public Dictionary<string,float> Search(string querytxt) 
+        public SortedList<float, string> Search(string querytxt) 
         {
            // List<string> docids = new List<string>();
             createQuerySet(querytxt);
-            queryTokens.IntersectWith(idxCorpus);
+            queryTokens.IntersectWith(invertedIdx.Keys);
             //ToDo: Create rank documents function using BM25
             Utilities.Ranker _ranker = new Utilities.Ranker(this);
             var docRanks = _ranker.RankDocs(queryTokens);
-
-            return docRanks;
+            SortedList<float, string> RankedSearchResults = new SortedList<float, string>(new DescComparer<float>());
+            foreach(string doc in docRanks.Keys)
+            {
+                RankedSearchResults.Add(docRanks[doc], doc);
+            }
+            return RankedSearchResults;
         }
 
         
@@ -139,13 +143,21 @@ namespace ConsoleApplication5.Index
         {
             terms_Idf = new Dictionary<string, double>();
             // create term idf's
-            foreach(string term in idxCorpus)
+            foreach(string term in invertedIdx.Keys)
             {
                 double num = this.docLength.Count - this.invertedIdx[term].Count + 0.5;
                 double denom = this.invertedIdx[term].Count + 0.5;
                 double idf = Math.Log10((num / denom)+1); // lucene hack?
                 this.terms_Idf.Add(term, idf);
             }
+        }
+    }
+
+    class DescComparer<T> : IComparer<T>
+    {
+        public int Compare(T x, T y)
+        {
+            return Comparer<T>.Default.Compare(y, x);
         }
     }
 }
