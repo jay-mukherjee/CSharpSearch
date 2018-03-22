@@ -32,6 +32,9 @@ namespace ConsoleApplication5
             Index.Indexor idx = new Index.Indexor();
             idx.CreateInvertedIndex(testDocs);
             var invidx = idx.InvertedIdx;
+            var querySet = idx.Search("Roman countrymen olive");
+            Console.WriteLine("Done");
+
         }
     }
 }
