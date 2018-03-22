@@ -64,17 +64,16 @@ namespace ConsoleApplication5.Index
             createTermIdfs();
         }
 
-        public List<string> Search(string querytxt) 
+        public Dictionary<string,float> Search(string querytxt) 
         {
-            List<string> docids = new List<string>();
+           // List<string> docids = new List<string>();
             createQuerySet(querytxt);
             queryTokens.IntersectWith(idxCorpus);
             //ToDo: Create rank documents function using BM25
-            foreach(string qt in queryTokens)
-            {
-                docids.Add(qt);
-            }
-            return docids;
+            Utilities.Ranker _ranker = new Utilities.Ranker(this);
+            var docRanks = _ranker.RankDocs(queryTokens);
+
+            return docRanks;
         }
 
         
